@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crezo - Amazon Comfort</title>
+  <style>
+    :root {
+      --bg-primary: #0f141c;
+      --bg-card: #18202c;
+      --bg-hover: #222d3d;
+      --border-color: #2a3749;
+      --text-main: #f0f6fc;
+      --text-sub: #8b949e;
+      --accent-orange: #ff9900;
+      --accent-blue: #388bfd;
+      --badge-bg: rgba(255, 153, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 330px;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", Meiryo, sans-serif;
+      padding: 16px;
+      font-size: 13px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #ff9900 0%, #ffad33 100%);
+      color: #111;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .version-tag {
+      font-size: 11px;
+      color: var(--text-sub);
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-sub);
+      margin: 14px 0 8px 2px;
+      font-weight: 600;
+    }
+
+    .toggle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .toggle-card:hover {
+      background: var(--bg-hover);
+      border-color: #3b4c63;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-title {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-desc {
+      font-size: 11px;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    /* Modern Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2e3846;
+      transition: .25s ease;
+      border-radius: 22px;
+      border: 1px solid #414f63;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      transition: .25s ease;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-orange);
+      border-color: #e68a00;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+      background-color: #111;
+    }
+
+    /* Support Card (Opt-in) */
+    .support-card {
+      background: rgba(255, 153, 0, 0.05);
+      border: 1px solid rgba(255, 153, 0, 0.25);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 14px;
+    }
+
+    .support-card .toggle-title {
+      color: var(--accent-orange);
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .footer a {
+      color: var(--text-sub);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer a:hover {
+      color: var(--accent-orange);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-container">
+      <span class="brand-badge">Crezo</span>
+      <span class="title">Amazon 快適化</span>
+    </div>
+    <span class="version-tag">v1.0.0</span>
+  </div>
+
+  <div class="section-title">買い物フィルター</div>
+
+  <div class="toggle-card">
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">🛡️ Amazon公式販売のみ</div>
+        <div class="toggle-desc">転売業者や怪しい出品者を一括除外（公式販売・発送のみ表示）</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="official-only">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="toggle-card">
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">⚡ 自動スクロール</div>
+        <div class="toggle-desc">ページ最下部へスクロールすると自動で次の検索結果を読み込みます</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="infinite-scroll">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section-title">開発・応援</div>
+
+  <div class="support-card">
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-title">☕ 開発者を支援する</div>
+        <div class="toggle-desc">お買い物の際に開発者に少額の報酬が還元されます（商品の購入価格は変わりません）。</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="support-dev">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>© 2026 Crezo Lab</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
