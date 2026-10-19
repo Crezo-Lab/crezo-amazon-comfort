@@ -9,7 +9,10 @@
     officialOnly: false,      // Amazon公式販売のみ
     infiniteScroll: true,     // 自動ページ追加
     supportDev: false,        // 開発支援（オプトイン）
-    affiliateTag: "newbie01280e-22"
+    affiliateTags: {
+      "co.jp": "newbie01280e-22",
+      "com": "newbie012800-20"
+    }
   };
 
   let currentSettings = { ...DEFAULT_SETTINGS };
@@ -226,15 +229,26 @@
    * 4. 開発支援（完全オプトイン・ユーザーの自由意思による許可）
    * ======================================================== */
   function handleDevSupport() {
-    if (!currentSettings.supportDev || !currentSettings.affiliateTag) return;
+    if (!currentSettings.supportDev) return;
+
+    const hostname = window.location.hostname;
+    let targetTag = null;
+
+    if (hostname.includes('amazon.co.jp')) {
+      targetTag = currentSettings.affiliateTags?.["co.jp"] || "newbie01280e-22";
+    } else if (hostname.includes('amazon.com')) {
+      targetTag = currentSettings.affiliateTags?.["com"] || "newbie012800-20";
+    }
+
+    if (!targetTag) return;
 
     // 商品リンクにタグを付与（規約に準拠したオープンなオプトイン形式）
     const productLinks = document.querySelectorAll('a[href*="/dp/"], a[href*="/gp/product/"]');
     productLinks.forEach(link => {
       try {
         const u = new URL(link.href, window.location.origin);
-        if (u.hostname.includes('amazon.co.jp') && !u.searchParams.has('tag')) {
-          u.searchParams.set('tag', currentSettings.affiliateTag);
+        if ((u.hostname.includes('amazon.co.jp') || u.hostname.includes('amazon.com')) && !u.searchParams.has('tag')) {
+          u.searchParams.set('tag', targetTag);
           link.href = u.toString();
         }
       } catch (e) {

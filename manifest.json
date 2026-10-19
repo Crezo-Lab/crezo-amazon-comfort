@@ -9,7 +9,9 @@
   ],
   "host_permissions": [
     "https://www.amazon.co.jp/*",
-    "https://amazon.co.jp/*"
+    "https://amazon.co.jp/*",
+    "https://www.amazon.com/*",
+    "https://amazon.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -28,7 +30,9 @@
     {
       "matches": [
         "https://www.amazon.co.jp/*",
-        "https://amazon.co.jp/*"
+        "https://amazon.co.jp/*",
+        "https://www.amazon.com/*",
+        "https://amazon.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],
