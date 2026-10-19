@@ -1,6 +1,9 @@
 (() => {
   'use strict';
 
+  const OFFICIAL_PARAM_KEY = 'emi';
+  const OFFICIAL_PARAM_VAL = 'AN1VRQENFRJN5';
+
   // 初期設定
   const DEFAULT_SETTINGS = {
     officialOnly: false,      // Amazon公式販売のみ
@@ -50,9 +53,13 @@
     const searchContainer = document.querySelector('.s-desktop-content') || document.querySelector('[data-component-type="s-search-results"]');
     if (!searchContainer) return;
 
+    const currentUrl = new URL(window.location.href);
+    const urlHasParam = currentUrl.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL || 
+                        (currentUrl.searchParams.get('rh') && currentUrl.searchParams.get('rh').includes(OFFICIAL_PARAM_VAL)) ||
+                        window.location.search.includes(OFFICIAL_PARAM_VAL);
+
     const bar = document.createElement('div');
     bar.id = 'crezo-quick-bar';
-    const urlHasParam = new URL(window.location.href).searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL;
     bar.innerHTML = `
       <div class="crezo-bar-content">
         <span class="crezo-logo-badge">Crezo</span>
@@ -90,8 +97,6 @@
   /* ========================================================
    * 2. Amazon公式販売（&emi=AN1VRQENFRJN5）の反映
    * ======================================================== */
-  const OFFICIAL_PARAM_KEY = 'emi';
-  const OFFICIAL_PARAM_VAL = 'AN1VRQENFRJN5';
 
   function handleOfficialOnlyFilter() {
     // ページロード時の自動リダイレクトは無限ループや意図せぬリロードを招くため行わない。
@@ -100,12 +105,23 @@
 
   function toggleOfficialUrlParam(enable) {
     const url = new URL(window.location.href);
-    const hasParam = url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL;
+    const hasParam = url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL ||
+                     (url.searchParams.get('rh') && url.searchParams.get('rh').includes(OFFICIAL_PARAM_VAL));
+
     if (enable && !hasParam) {
       url.searchParams.set(OFFICIAL_PARAM_KEY, OFFICIAL_PARAM_VAL);
       window.location.href = url.toString();
     } else if (!enable && hasParam) {
       url.searchParams.delete(OFFICIAL_PARAM_KEY);
+      if (url.searchParams.has('rh')) {
+        let rh = url.searchParams.get('rh');
+        rh = rh.replace(/,?p_6:[^,]+/g, '');
+        if (rh) {
+          url.searchParams.set('rh', rh);
+        } else {
+          url.searchParams.delete('rh');
+        }
+      }
       window.location.href = url.toString();
     }
   }
