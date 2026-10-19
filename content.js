@@ -52,11 +52,12 @@
 
     const bar = document.createElement('div');
     bar.id = 'crezo-quick-bar';
+    const urlHasParam = new URL(window.location.href).searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL;
     bar.innerHTML = `
       <div class="crezo-bar-content">
         <span class="crezo-logo-badge">Crezo</span>
         <label class="crezo-switch-label" title="Amazon.co.jp公式が販売・発送する商品のみに絞り込みます">
-          <input type="checkbox" id="crezo-toggle-official" ${currentSettings.officialOnly ? 'checked' : ''}>
+          <input type="checkbox" id="crezo-toggle-official" ${urlHasParam ? 'checked' : ''}>
           <span class="crezo-switch-text">🛡️ Amazon公式販売のみ</span>
         </label>
         <label class="crezo-switch-label" title="スクロールすると次ページを自動で読み込みます">
@@ -93,27 +94,20 @@
   const OFFICIAL_PARAM_VAL = 'AN1VRQENFRJN5';
 
   function handleOfficialOnlyFilter() {
-    const url = new URL(window.location.href);
-    const hasParam = url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL;
-
-    // 設定と現在のURLパラメータが一致しているか
-    if (currentSettings.officialOnly && !hasParam) {
-      // 検索結果ページの場合のみリダイレクト
-      if (url.pathname.includes('/s') || url.searchParams.has('k')) {
-        toggleOfficialUrlParam(true);
-      }
-    }
+    // ページロード時の自動リダイレクトは無限ループや意図せぬリロードを招くため行わない。
+    // クイックバーやポップアップのトグル操作時のみURLを変更する。
   }
 
   function toggleOfficialUrlParam(enable) {
     const url = new URL(window.location.href);
-    if (enable) {
+    const hasParam = url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL;
+    if (enable && !hasParam) {
       url.searchParams.set(OFFICIAL_PARAM_KEY, OFFICIAL_PARAM_VAL);
-    } else {
+      window.location.href = url.toString();
+    } else if (!enable && hasParam) {
       url.searchParams.delete(OFFICIAL_PARAM_KEY);
+      window.location.href = url.toString();
     }
-    // ページ遷移して絞り込みを適用
-    window.location.href = url.toString();
   }
 
   /* ========================================================
