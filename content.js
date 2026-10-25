@@ -22,6 +22,8 @@
   let generation = 0;
   let currentContainer = null;
   let stopMessageTimer = null;
+  // 読み込んだページ（同じページを二度取りに行かない）
+  const loadedPages = new Set([OfficialUrl.pageKey(window.location.href)]);
 
   // 1.0.0 の開発支援（アソシエイトのタグ付け）は 1.0.1 で外した。保存済みの設定も消す
   // （sync は書き込み回数に上限があるので、残っているときだけ消す）
@@ -187,6 +189,8 @@
     hasMorePages = true;
     fetchFailures = 0;
     showingStopMessage = false;
+    loadedPages.clear();
+    loadedPages.add(OfficialUrl.pageKey(window.location.href));
     clearTimeout(stopMessageTimer);
     showLoadingIndicator(false);
     insertQuickToggleBar();
@@ -262,6 +266,11 @@
       hasMorePages = false;
       return;
     }
+    // 「次へ」が読み込み済みのページを指していたら、同じ商品を取り続けないよう止める
+    if (loadedPages.has(OfficialUrl.pageKey(nextUrl.href))) {
+      hasMorePages = false;
+      return;
+    }
 
     isFetchingNextPage = true;
     showLoadingIndicator(true);
@@ -310,13 +319,14 @@
         pageSeparator.appendChild(label);
         insert(pageSeparator);
 
-        // 同じ商品を二度足さない
+        // 同じ商品を二度足さない（一覧の商品だけで見る。スポンサーの横並びの中の ASIN で次のページの商品を落とさない）
         const seen = new Set();
-        mainContainer.querySelectorAll('[data-asin]').forEach(el => {
+        mainContainer.querySelectorAll('[data-component-type="s-search-result"][data-asin]').forEach(el => {
           const asin = el.getAttribute('data-asin');
           if (asin) seen.add(asin);
         });
 
+        let added = 0;
         newResults.forEach(item => {
           const asin = item.getAttribute('data-asin');
           if (asin && seen.has(asin)) return;
@@ -324,7 +334,15 @@
           const node = document.importNode(item, true);
           fixLazyImages(node);
           insert(node);
+          added += 1;
         });
+        loadedPages.add(OfficialUrl.pageKey(nextUrl.href));
+        if (added === 0) {
+          // 全部が読み込み済みの商品だった（同じページが返ってきた）。区切りだけを残さずに止める
+          pageSeparator.remove();
+          stopWithMessage(FAIL_MESSAGE);
+          return;
+        }
 
         // ページ送りを新しいページのものに入れ替える（「次へ」が次の未読ページを指すように）
         const newPaginationBlock = findPaginationBlock(doc.querySelector('.s-main-slot') || doc.querySelector('.s-result-list'));
