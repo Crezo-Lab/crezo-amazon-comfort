@@ -16,6 +16,12 @@
   let isFetchingNextPage = false;
   let hasMorePages = true;
   let fetchFailures = 0;
+  // Amazon は並べ替え・絞り込みで一覧だけを書き換えて URL を変えることがある。
+  // そのとき前の検索の続きを足さないよう、検索の鍵と世代で見分ける
+  let currentSearchKey = OfficialUrl.searchKey(window.location.href);
+  let generation = 0;
+  let currentContainer = null;
+  let stopMessageTimer = null;
 
   // 1.0.0 の開発支援（アソシエイトのタグ付け）は 1.0.1 で外した。保存済みの設定も消す
   // （sync は書き込み回数に上限があるので、残っているときだけ消す）
@@ -153,6 +159,7 @@
    * ======================================================== */
   function setupInfiniteScroll() {
     window.addEventListener('scroll', () => {
+      resetIfSearchChanged();
       if (!currentSettings.infiniteScroll || isFetchingNextPage || !hasMorePages) return;
 
       // 商品一覧の末尾が画面の下から1200px以内に来たら次を読み込む
@@ -164,6 +171,27 @@
         fetchNextPage();
       }
     }, { passive: true });
+    window.addEventListener('popstate', resetIfSearchChanged);
+  }
+
+  // 一覧だけが書き換わって別の検索になったら、自動スクロールの状態を最初に戻す
+  function resetIfSearchChanged() {
+    const key = OfficialUrl.searchKey(window.location.href);
+    const container = getResultsContainer();
+    if (currentContainer === null) currentContainer = container;
+    if (key === currentSearchKey && container === currentContainer) return;
+    currentSearchKey = key;
+    currentContainer = container;
+    generation += 1; // 読み込み途中の前の検索の結果は捨てる
+    isFetchingNextPage = false;
+    hasMorePages = true;
+    fetchFailures = 0;
+    showingStopMessage = false;
+    clearTimeout(stopMessageTimer);
+    showLoadingIndicator(false);
+    insertQuickToggleBar();
+    const officialCb = document.getElementById('crezo-toggle-official');
+    if (officialCb) officialCb.checked = urlHasOfficialParam(new URL(window.location.href));
   }
 
   function findNextLink(root) {
@@ -212,7 +240,8 @@
     hasMorePages = false;
     showingStopMessage = true;
     showLoadingIndicator(true, message);
-    setTimeout(() => showLoadingIndicator(false), 8000);
+    clearTimeout(stopMessageTimer);
+    stopMessageTimer = setTimeout(() => showLoadingIndicator(false), 8000);
   }
 
   function fetchNextPage() {
@@ -236,6 +265,12 @@
 
     isFetchingNextPage = true;
     showLoadingIndicator(true);
+    const myGeneration = generation;
+    const startContainer = getResultsContainer();
+    // 届くまでに別の検索へ移った（一覧が書き換わった）ら、前の検索の続きは足さない
+    const isStale = () => myGeneration !== generation ||
+      OfficialUrl.searchKey(window.location.href) !== currentSearchKey ||
+      getResultsContainer() !== startContainer;
 
     fetch(nextUrl.toString(), { credentials: 'same-origin' })
       .then(res => {
@@ -243,6 +278,7 @@
         return res.text();
       })
       .then(html => {
+        if (isStale()) return;
         const doc = new DOMParser().parseFromString(html, 'text/html');
 
         const newResults = doc.querySelectorAll('[data-component-type="s-search-result"]');
@@ -307,6 +343,7 @@
 
       })
       .catch(err => {
+        if (isStale()) return;
         fetchFailures += 1;
         console.warn('[Crezo Amazon Comfort] Failed to load next page:', err);
         if (fetchFailures >= MAX_FETCH_FAILURES) {
@@ -314,6 +351,7 @@
         }
       })
       .finally(() => {
+        if (myGeneration !== generation) return; // 新しい検索の状態は触らない
         isFetchingNextPage = false;
         // 止めた文言を出しているときだけ残す（最後のページまで読んだときは消す）
         if (!showingStopMessage) showLoadingIndicator(false);
