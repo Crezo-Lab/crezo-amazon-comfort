@@ -4,5 +4,23 @@
   },
   "appDesc": {
     "message": "Filter out shady marketplace sellers (Amazon official sales only) and automatically load the next page for seamless shopping."
+  },
+  "popupTitle": {
+    "message": "Amazon Comfort"
+  },
+  "sectionFilters": {
+    "message": "Shopping filters"
+  },
+  "officialTitle": {
+    "message": "Sold by Amazon only"
+  },
+  "officialDesc": {
+    "message": "Hide resellers and unknown marketplace sellers (shows items sold and shipped by Amazon)"
+  },
+  "scrollTitle": {
+    "message": "Auto-load next page"
+  },
+  "scrollDesc": {
+    "message": "When you reach the bottom of the results, the next page loads automatically"
   }
 }

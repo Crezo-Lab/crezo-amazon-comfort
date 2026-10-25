@@ -4,5 +4,23 @@
   },
   "appDesc": {
     "message": "Amazonの検索結果から怪しいマケプレ・転売品を除外（公式販売のみ絞り込み）＆次ページを自動読み込みする快適ショッピング拡張機能。"
+  },
+  "popupTitle": {
+    "message": "Amazon 快適化"
+  },
+  "sectionFilters": {
+    "message": "買い物フィルター"
+  },
+  "officialTitle": {
+    "message": "Amazon公式販売のみ"
+  },
+  "officialDesc": {
+    "message": "転売業者や怪しい出品者を一括除外（公式販売・発送のみ表示）"
+  },
+  "scrollTitle": {
+    "message": "自動スクロール"
+  },
+  "scrollDesc": {
+    "message": "ページ最下部へスクロールすると自動で次の検索結果を読み込みます"
   }
 }

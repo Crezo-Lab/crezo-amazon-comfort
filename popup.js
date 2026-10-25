@@ -2,6 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const officialOnlyCb = document.getElementById('official-only');
   const infiniteScrollCb = document.getElementById('infinite-scroll');
 
+  // 文言はブラウザの言語に合わせる（_locales に無い言語は ja のまま）
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const msg = chrome.i18n.getMessage(el.dataset.i18n);
+    if (msg) el.textContent = msg;
+  });
+  document.documentElement.lang = chrome.i18n.getUILanguage().startsWith('ja') ? 'ja' : 'en';
+  document.getElementById('appVersion').textContent = 'v' + chrome.runtime.getManifest().version;
+
   const DEFAULTS = {
     officialOnly: false,
     infiniteScroll: true
