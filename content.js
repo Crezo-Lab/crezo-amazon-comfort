@@ -24,10 +24,14 @@
   let fetchFailures = 0;
 
   // 1.0.0 の開発支援（アソシエイトのタグ付け）は 1.0.1 で外した。保存済みの設定も消す
-  chrome.storage.sync.remove(['supportDev', 'affiliateTags'], () => {
-    if (chrome.runtime.lastError) {
-      console.warn('[Crezo Amazon Comfort] 古い設定を消せませんでした:', chrome.runtime.lastError.message);
-    }
+  // （sync は書き込み回数に上限があるので、残っているときだけ消す）
+  chrome.storage.sync.get(['supportDev', 'affiliateTags'], (old) => {
+    if (chrome.runtime.lastError || !old || Object.keys(old).length === 0) return;
+    chrome.storage.sync.remove(['supportDev', 'affiliateTags'], () => {
+      if (chrome.runtime.lastError) {
+        console.warn('[Crezo Amazon Comfort] 古い設定を消せませんでした:', chrome.runtime.lastError.message);
+      }
+    });
   });
 
   // 設定読み込み
@@ -236,8 +240,11 @@
 
   const FAIL_MESSAGE = '次のページを読み込めませんでした。下のページ送りから進んでください';
 
+  let showingStopMessage = false;
+
   function stopWithMessage(message) {
     hasMorePages = false;
+    showingStopMessage = true;
     showLoadingIndicator(true, message);
     setTimeout(() => showLoadingIndicator(false), 8000);
   }
@@ -342,7 +349,8 @@
       })
       .finally(() => {
         isFetchingNextPage = false;
-        if (hasMorePages) showLoadingIndicator(false);
+        // 止めた文言を出しているときだけ残す（最後のページまで読んだときは消す）
+        if (!showingStopMessage) showLoadingIndicator(false);
       });
   }
 
