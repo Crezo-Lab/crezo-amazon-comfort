@@ -5,6 +5,19 @@
   const OfficialUrl = globalThis.CrezoOfficialUrl;
   const OFFICIAL_PARAM_VAL = OfficialUrl.sellerIdForHost(window.location.hostname);
   const MAX_FETCH_FAILURES = 2;
+
+  // 画面に出す文言（_locales/*/messages.json の content で始まるキー）
+  function t(key, subs) {
+    try {
+      const msg = chrome.i18n.getMessage(key, subs);
+      if (msg) return msg;
+      console.warn('[Crezo Amazon Comfort] 文言が見つかりません:', key);
+    } catch (e) {
+      // 拡張の更新後に残った古いスクリプトでは chrome.* が使えない
+      console.warn('[Crezo Amazon Comfort] 文言を読めませんでした:', key, e);
+    }
+    return key;
+  }
   const RETRY_DELAY_MS = 3000; // 1回目の失敗のあと、すぐ取り直さない（Amazon に連打しない）
 
   // 初期設定
@@ -102,16 +115,23 @@
     bar.innerHTML = `
       <div class="crezo-bar-content">
         <span class="crezo-logo-badge">Crezo</span>
-        <label class="crezo-switch-label" title="Amazon公式が販売・発送する商品のみに絞り込みます">
+        <label class="crezo-switch-label" data-crezo="official">
           <input type="checkbox" id="crezo-toggle-official" ${urlHasParam ? 'checked' : ''}>
-          <span class="crezo-switch-text">🛡️ Amazon公式販売のみ</span>
+          <span class="crezo-switch-text"></span>
         </label>
-        <label class="crezo-switch-label" title="スクロールすると次ページを自動で読み込みます">
+        <label class="crezo-switch-label" data-crezo="scroll">
           <input type="checkbox" id="crezo-toggle-scroll" ${currentSettings.infiniteScroll ? 'checked' : ''}>
-          <span class="crezo-switch-text">⚡ 自動スクロール</span>
+          <span class="crezo-switch-text"></span>
         </label>
       </div>
     `;
+    // 文言は _locales から（ブラウザの言語に合わせる）。textContent で入れる
+    const officialLabel = bar.querySelector('[data-crezo="official"]');
+    officialLabel.title = t('contentBarOfficialHint');
+    officialLabel.querySelector('.crezo-switch-text').textContent = '🛡️ ' + t('contentBarOfficial');
+    const scrollLabel = bar.querySelector('[data-crezo="scroll"]');
+    scrollLabel.title = t('contentBarScrollHint');
+    scrollLabel.querySelector('.crezo-switch-text').textContent = '⚡ ' + t('contentBarScroll');
 
     // 検索ヘッダーの上部に挿入
     searchContainer.parentNode.insertBefore(bar, searchContainer);
@@ -248,7 +268,7 @@
     });
   }
 
-  const FAIL_MESSAGE = '次のページを読み込めませんでした。下のページ送りから進んでください';
+  const FAIL_MESSAGE = t('contentLoadFailed');
 
   let showingStopMessage = false;
 
@@ -327,7 +347,7 @@
         pageSeparator.className = 'crezo-page-separator';
         const label = document.createElement('span');
         const pageNum = nextUrl.searchParams.get('page');
-        label.textContent = /^\d+$/.test(pageNum || '') ? `Page ${pageNum}` : '次のページ';
+        label.textContent = /^\d+$/.test(pageNum || '') ? t('contentPageNumber', [pageNum]) : t('contentNextPage');
         pageSeparator.appendChild(label);
         insert(pageSeparator);
 
@@ -401,7 +421,7 @@
         `;
         document.body.appendChild(loader);
       }
-      loader.querySelector('.crezo-loading-text').textContent = message || '次の商品を読み込み中...';
+      loader.querySelector('.crezo-loading-text').textContent = message || t('contentLoading');
       loader.querySelector('.crezo-spinner').style.display = message ? 'none' : '';
       loader.classList.add('active');
     } else if (loader) {

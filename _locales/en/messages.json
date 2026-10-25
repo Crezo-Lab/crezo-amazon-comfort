@@ -22,5 +22,29 @@
   },
   "scrollDesc": {
     "message": "When you reach the bottom of the results, the next page loads automatically"
+  },
+  "contentBarOfficial": {
+    "message": "Sold by Amazon only"
+  },
+  "contentBarOfficialHint": {
+    "message": "Show only items sold and shipped by Amazon"
+  },
+  "contentBarScroll": {
+    "message": "Auto-load next page"
+  },
+  "contentBarScrollHint": {
+    "message": "Loads the next page automatically as you scroll"
+  },
+  "contentLoading": {
+    "message": "Loading more results..."
+  },
+  "contentLoadFailed": {
+    "message": "Couldn't load the next page. Use the page links below to continue."
+  },
+  "contentPageNumber": {
+    "message": "Page $1"
+  },
+  "contentNextPage": {
+    "message": "Next page"
   }
 }

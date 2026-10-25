@@ -22,5 +22,29 @@
   },
   "scrollDesc": {
     "message": "ページ最下部へスクロールすると自動で次の検索結果を読み込みます"
+  },
+  "contentBarOfficial": {
+    "message": "Amazon公式販売のみ"
+  },
+  "contentBarOfficialHint": {
+    "message": "Amazon公式が販売・発送する商品のみに絞り込みます"
+  },
+  "contentBarScroll": {
+    "message": "自動スクロール"
+  },
+  "contentBarScrollHint": {
+    "message": "スクロールすると次ページを自動で読み込みます"
+  },
+  "contentLoading": {
+    "message": "次の商品を読み込み中..."
+  },
+  "contentLoadFailed": {
+    "message": "次のページを読み込めませんでした。下のページ送りから進んでください"
+  },
+  "contentPageNumber": {
+    "message": "Page $1"
+  },
+  "contentNextPage": {
+    "message": "次のページ"
   }
 }
