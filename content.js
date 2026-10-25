@@ -120,25 +120,33 @@
     const officialCb = bar.querySelector('#crezo-toggle-official');
     officialCb.addEventListener('change', (e) => {
       const enabled = e.target.checked;
-      chrome.storage.sync.set({ officialOnly: enabled }, () => {
-        if (chrome.runtime.lastError) {
-          console.warn('[Crezo Amazon Comfort] 設定を保存できませんでした:', chrome.runtime.lastError.message);
-        }
-        // 保存に失敗しても、押した操作はこのページに反映する
-        toggleOfficialUrlParam(enabled);
-      });
+      // 保存に失敗しても、押した操作はこのページに反映する
+      saveSetting({ officialOnly: enabled }, () => toggleOfficialUrlParam(enabled));
     });
 
     const scrollCb = bar.querySelector('#crezo-toggle-scroll');
     scrollCb.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       currentSettings.infiniteScroll = enabled;
-      chrome.storage.sync.set({ infiniteScroll: enabled }, () => {
+      saveSetting({ infiniteScroll: enabled });
+    });
+  }
+
+  // 拡張を更新・読み直したあと、開いたままのタブに残った古い content script では
+  // chrome.storage が "Extension context invalidated" を投げる。投げても押した操作は止めない
+  function saveSetting(values, after) {
+    const done = () => { if (after) after(); };
+    try {
+      chrome.storage.sync.set(values, () => {
         if (chrome.runtime.lastError) {
           console.warn('[Crezo Amazon Comfort] 設定を保存できませんでした:', chrome.runtime.lastError.message);
         }
+        done();
       });
-    });
+    } catch (e) {
+      console.warn('[Crezo Amazon Comfort] 設定を保存できませんでした（ページを読み直すと直ります）:', e);
+      done();
+    }
   }
 
   /* ========================================================
