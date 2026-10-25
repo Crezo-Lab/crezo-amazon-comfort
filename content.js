@@ -5,6 +5,7 @@
   const OfficialUrl = globalThis.CrezoOfficialUrl;
   const OFFICIAL_PARAM_VAL = OfficialUrl.sellerIdForHost(window.location.hostname);
   const MAX_FETCH_FAILURES = 2;
+  const RETRY_DELAY_MS = 3000; // 1回目の失敗のあと、すぐ取り直さない（Amazon に連打しない）
 
   // 初期設定
   const DEFAULT_SETTINGS = {
@@ -16,6 +17,7 @@
   let isFetchingNextPage = false;
   let hasMorePages = true;
   let fetchFailures = 0;
+  let retryAfter = 0;
   // Amazon は並べ替え・絞り込みで一覧だけを書き換えて URL を変えることがある。
   // そのとき前の検索の続きを足さないよう、検索の鍵と世代で見分ける
   let currentSearchKey = OfficialUrl.searchKey(window.location.href);
@@ -163,6 +165,7 @@
     window.addEventListener('scroll', () => {
       resetIfSearchChanged();
       if (!currentSettings.infiniteScroll || isFetchingNextPage || !hasMorePages) return;
+      if (Date.now() < retryAfter) return;
 
       // 商品一覧の末尾が画面の下から1200px以内に来たら次を読み込む
       // （document.documentElement.offsetHeight は Amazon で実際の高さと合わないことがある）
@@ -188,6 +191,7 @@
     isFetchingNextPage = false;
     hasMorePages = true;
     fetchFailures = 0;
+    retryAfter = 0;
     showingStopMessage = false;
     loadedPages.clear();
     loadedPages.add(OfficialUrl.pageKey(window.location.href));
@@ -363,6 +367,7 @@
       .catch(err => {
         if (isStale()) return;
         fetchFailures += 1;
+        retryAfter = Date.now() + RETRY_DELAY_MS;
         console.warn('[Crezo Amazon Comfort] Failed to load next page:', err);
         if (fetchFailures >= MAX_FETCH_FAILURES) {
           stopWithMessage(FAIL_MESSAGE);
