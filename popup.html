@@ -3,18 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title>Crezo - Amazon Comfort</title>
   <style>
     :root {
-      --bg-primary: #0f141c;
-      --bg-card: #18202c;
-      --bg-hover: #222d3d;
-      --border-color: #2a3749;
-      --text-main: #f0f6fc;
-      --text-sub: #8b949e;
-      --accent-orange: #ff9900;
-      --accent-blue: #388bfd;
-      --badge-bg: rgba(255, 153, 0, 0.15);
+      color-scheme: light dark;
+      --bg: #f7f6f3;
+      --row-hover: #edebe6;
+      --line: #d6d3cb;
+      --text: #1c1f24;
+      --text-sub: #565d68;
+      --accent: #b84e00;      /* オン・ロゴ。白地で 4.9:1 */
+      --on-accent: #ffffff;
+      --track-off: #6b7280;   /* オフの枠線・つまみ。地に対し 3:1 以上 */
+      --focus: #0b57d0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16191f;
+        --row-hover: #1e232b;
+        --line: #2f3641;
+        --text: #eceff3;
+        --text-sub: #a3abb7;
+        --accent: #ff9900;
+        --on-accent: #16191f;
+        --track-off: #8b94a3;
+        --focus: #8ab4f8;
+      }
     }
 
     * {
@@ -24,168 +40,170 @@
     }
 
     body {
-      width: 330px;
-      background: var(--bg-primary);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", Meiryo, sans-serif;
-      padding: 16px;
-      font-size: 13px;
+      width: 340px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
+      gap: 8px;
+      padding: 14px 16px 12px;
     }
 
     .logo-container {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
     }
 
     .brand-badge {
-      background: linear-gradient(135deg, #ff9900 0%, #ffad33 100%);
-      color: #111;
-      font-weight: 800;
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      background: var(--accent);
+      color: var(--on-accent);
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: 3px;
     }
 
     .title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--text-main);
+      overflow-wrap: anywhere;
+      text-wrap: balance;
     }
 
     .version-tag {
-      font-size: 11px;
+      flex-shrink: 0;
+      font-size: 12px;
       color: var(--text-sub);
-      background: var(--bg-card);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
+      font-variant-numeric: tabular-nums;
     }
 
     .section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-sub);
-      margin: 14px 0 8px 2px;
+      padding: 6px 16px;
+      font-size: 12px;
       font-weight: 600;
+      color: var(--text-sub);
+      border-top: 1px solid var(--line);
     }
 
+    /* 行ぜんぶが押せる。行の高さは最低 64px */
     .toggle-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      display: block;
+      border-top: 1px solid var(--line);
+      cursor: pointer;
     }
+    .toggle-card:first-of-type { border-top: 0; }
 
     .toggle-card:hover {
-      background: var(--bg-hover);
-      border-color: #3b4c63;
+      background: var(--row-hover);
     }
 
     .toggle-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 16px;
+      min-height: 64px;
+      padding: 12px 16px;
     }
 
     .toggle-info {
       flex: 1;
+      min-width: 0;
     }
 
     .toggle-title {
       font-weight: 600;
-      font-size: 13px;
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
     }
 
     .toggle-desc {
-      font-size: 11px;
+      margin-top: 2px;
+      font-size: 12px;
       color: var(--text-sub);
-      line-height: 1.4;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+      text-wrap: pretty;
+      line-break: strict;
     }
 
-    /* Modern Toggle Switch */
+    /* スイッチ: オン＝塗り＋つまみが右、オフ＝枠だけ＋つまみが左 */
     .switch {
       position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 22px;
+      display: block;
+      width: 44px;
+      height: 26px;
       flex-shrink: 0;
     }
 
     .switch input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
       opacity: 0;
-      width: 0;
-      height: 0;
+      cursor: pointer;
     }
 
     .slider {
       position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #2e3846;
-      transition: .25s ease;
-      border-radius: 22px;
-      border: 1px solid #414f63;
+      inset: 0;
+      border: 2px solid var(--track-off);
+      border-radius: 13px;
+      background: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      pointer-events: none;
     }
 
-    .slider:before {
-      position: absolute;
+    .slider::before {
       content: "";
-      height: 14px;
-      width: 14px;
+      position: absolute;
+      top: 3px;
       left: 3px;
-      bottom: 3px;
-      background-color: #ffffff;
-      transition: .25s ease;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
+      background: var(--track-off);
+      transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
     input:checked + .slider {
-      background-color: var(--accent-orange);
-      border-color: #e68a00;
+      background: var(--accent);
+      border-color: var(--accent);
     }
 
-    input:checked + .slider:before {
-      transform: translateX(16px);
-      background-color: #111;
+    input:checked + .slider::before {
+      transform: translateX(18px);
+      background: var(--on-accent);
+    }
+
+    input:focus-visible + .slider {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
     }
 
     .footer {
-      margin-top: 14px;
+      padding: 10px 16px 12px;
+      border-top: 1px solid var(--line);
       text-align: center;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-sub);
     }
 
-    .footer a {
-      color: var(--text-sub);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-
-    .footer a:hover {
-      color: var(--accent-orange);
+    @media (prefers-reduced-motion: reduce) {
+      .slider, .slider::before { transition: none; }
     }
   </style>
 </head>
@@ -200,31 +218,31 @@
 
   <div class="section-title">買い物フィルター</div>
 
-  <div class="toggle-card">
+  <label class="toggle-card">
     <div class="toggle-row">
       <div class="toggle-info">
-        <div class="toggle-title">🛡️ Amazon公式販売のみ</div>
+        <div class="toggle-title">Amazon公式販売のみ</div>
         <div class="toggle-desc">転売業者や怪しい出品者を一括除外（公式販売・発送のみ表示）</div>
       </div>
-      <label class="switch">
+      <span class="switch">
         <input type="checkbox" id="official-only">
         <span class="slider"></span>
-      </label>
+      </span>
     </div>
-  </div>
+  </label>
 
-  <div class="toggle-card">
+  <label class="toggle-card">
     <div class="toggle-row">
       <div class="toggle-info">
-        <div class="toggle-title">⚡ 自動スクロール</div>
+        <div class="toggle-title">自動スクロール</div>
         <div class="toggle-desc">ページ最下部へスクロールすると自動で次の検索結果を読み込みます</div>
       </div>
-      <label class="switch">
+      <span class="switch">
         <input type="checkbox" id="infinite-scroll">
         <span class="slider"></span>
-      </label>
+      </span>
     </div>
-  </div>
+  </label>
 
   <div class="footer">
     <span>© 2026 Crezo Lab</span>
