@@ -34,7 +34,7 @@
         "https://www.amazon.com/*",
         "https://amazon.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["official-url.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }

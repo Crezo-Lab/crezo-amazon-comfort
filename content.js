@@ -1,15 +1,9 @@
 (() => {
   'use strict';
 
-  const OFFICIAL_PARAM_KEY = 'emi';
-  // Amazon 本体の出品者ID（国ごとに違う）
-  const OFFICIAL_SELLER_IDS = {
-    'co.jp': 'AN1VRQENFRJN5',
-    'com': 'ATVPDKIKX0DER'
-  };
-  const OFFICIAL_PARAM_VAL = window.location.hostname.endsWith('amazon.com')
-    ? OFFICIAL_SELLER_IDS['com']
-    : OFFICIAL_SELLER_IDS['co.jp'];
+  // URL の判定・組み立ては official-url.js（manifest で先に読む・tests/ で試験する）
+  const OfficialUrl = globalThis.CrezoOfficialUrl;
+  const OFFICIAL_PARAM_VAL = OfficialUrl.sellerIdForHost(window.location.hostname);
   const MAX_FETCH_FAILURES = 2;
 
   // 初期設定
@@ -66,18 +60,7 @@
   }
 
   function urlHasOfficialParam(url) {
-    const rh = url.searchParams.get('rh') || '';
-    return url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL ||
-           rh.split(',').some(part => part.startsWith('p_6:') && part.slice(4).split('|').includes(OFFICIAL_PARAM_VAL));
-  }
-
-  // rh から Amazon 本体の出品者だけを外す（ほかの出品者・絞り込みは残す）
-  function removeOfficialFromRh(rh, sellerId) {
-    return rh.split(',').map(part => {
-      if (!part.startsWith('p_6:')) return part;
-      const ids = part.slice(4).split('|').filter(id => id && id !== sellerId);
-      return ids.length ? 'p_6:' + ids.join('|') : '';
-    }).filter(Boolean).join(',');
+    return OfficialUrl.hasOfficial(url, OFFICIAL_PARAM_VAL);
   }
 
   function init() {
@@ -158,28 +141,11 @@
   }
 
   function toggleOfficialUrlParam(enable) {
-    const url = new URL(window.location.href);
-    const hasParam = urlHasOfficialParam(url);
-
-    if (enable && !hasParam) {
-      url.searchParams.set(OFFICIAL_PARAM_KEY, OFFICIAL_PARAM_VAL);
-      url.searchParams.delete('page'); // 絞り込み後は1ページ目から
-      window.location.href = url.toString();
-    } else if (!enable && hasParam) {
-      if (url.searchParams.get(OFFICIAL_PARAM_KEY) === OFFICIAL_PARAM_VAL) {
-        url.searchParams.delete(OFFICIAL_PARAM_KEY);
-      }
-      if (url.searchParams.has('rh')) {
-        const rh = removeOfficialFromRh(url.searchParams.get('rh'), OFFICIAL_PARAM_VAL);
-        if (rh) {
-          url.searchParams.set('rh', rh);
-        } else {
-          url.searchParams.delete('rh');
-        }
-      }
-      url.searchParams.delete('page');
-      window.location.href = url.toString();
-    }
+    const href = window.location.href;
+    const next = enable
+      ? OfficialUrl.buildEnableUrl(href, OFFICIAL_PARAM_VAL)
+      : OfficialUrl.buildDisableUrl(href, OFFICIAL_PARAM_VAL);
+    if (next) window.location.href = next;
   }
 
   /* ========================================================
