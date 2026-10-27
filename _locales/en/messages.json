@@ -42,7 +42,8 @@
     "message": "Couldn't load the next page. Use the page links below to continue."
   },
   "contentPageNumber": {
-    "message": "Page $1"
+    "message": "Page $NUM$",
+    "placeholders": { "num": { "content": "$1" } }
   },
   "contentNextPage": {
     "message": "Next page"

@@ -42,7 +42,8 @@
     "message": "次のページを読み込めませんでした。下のページ送りから進んでください"
   },
   "contentPageNumber": {
-    "message": "Page $1"
+    "message": "$NUM$ ページ目",
+    "placeholders": { "num": { "content": "$1" } }
   },
   "contentNextPage": {
     "message": "次のページ"
